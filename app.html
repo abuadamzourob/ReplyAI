@@ -165,7 +165,6 @@
             border: 1px solid var(--border-gold);
         }
 
-        /* تصميم النافذة المنبثقة الفخمة (Modal) */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -317,7 +316,6 @@
         </div>
     </div>
 
-    <!-- هيكل النافذة المنبثقة المضافة حديثاً -->
     <div class="modal-overlay" id="modal-overlay">
         <div class="modal-box">
             <h3>إضافة قاعدة رد تلقائي جديدة</h3>
@@ -345,7 +343,6 @@
         </div>
     </div>
 
-    <!-- برمجة تفاعل الأزرار وإضافة البيانات للجدول مؤقتاً قبل الربط النهائي بـ Supabase -->
     <script>
         const openModalBtn = document.getElementById('open-modal-btn');
         const closeModalBtn = document.getElementById('close-modal-btn');
@@ -356,18 +353,15 @@
 
         let currentCount = 2;
 
-        // فتح النافذة
         openModalBtn.addEventListener('click', () => {
             modalOverlay.classList.add('active');
         });
 
-        // إغلاق النافذة
         closeModalBtn.addEventListener('click', () => {
             modalOverlay.classList.remove('active');
             replyForm.reset();
         });
 
-        // إغلاق عند الضغط خارج المربع
         modalOverlay.addEventListener('click', (e) => {
             if(e.target === modalOverlay) {
                 modalOverlay.classList.remove('active');
@@ -375,7 +369,6 @@
             }
         });
 
-        // استقبال البيانات وإضافتها للجدول
         replyForm.addEventListener('submit', (e) => {
             e.preventDefault();
             
@@ -383,7 +376,6 @@
             const replyText = document.getElementById('reply-input').value;
             const selectedTable = document.getElementById('table-select').value;
 
-            // إنشاء سطر جديد في الجدول بشكل فوري
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
                 <td><span class="badge">${keyword}</span></td>
@@ -394,11 +386,9 @@
 
             dataTableBody.appendChild(newRow);
 
-            // تحديث عداد الإحصائيات
             currentCount++;
             totalRepliesElement.textContent = currentCount;
 
-            // إغلاق النافذة وتنظيف النموذج
             modalOverlay.classList.remove('active');
             replyForm.reset();
         });
