@@ -164,6 +164,101 @@
             font-size: 12px;
             border: 1px solid var(--border-gold);
         }
+
+        /* تصميم النافذة المنبثقة الفخمة (Modal) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.3s ease;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-box {
+            background: var(--card-bg);
+            border: 2px solid var(--gold);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+            transform: scale(0.8);
+            transition: 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: scale(1);
+        }
+
+        .modal-box h3 {
+            margin: 0 0 20px 0;
+            color: var(--gold);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 10px;
+            background: #0d0d0d;
+            border: 1px solid var(--border-gold);
+            border-radius: 6px;
+            color: var(--text-light);
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .cancel-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--text-muted);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .cancel-btn:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-light);
+        }
     </style>
 </head>
 <body>
@@ -177,7 +272,7 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>إجمالي الردود المؤتمتة</h3>
-                <div class="number" id="total-replies">0</div>
+                <div class="number" id="total-replies">2</div>
             </div>
             <div class="stat-card">
                 <h3>الرسائل المستلمة اليوم</h3>
@@ -192,7 +287,7 @@
         <div class="main-content">
             <div class="content-header">
                 <h2>قواعد الرد الذكي المجدولة</h2>
-                <button class="add-btn">+ إضافة قاعدة رد جديدة</button>
+                <button class="add-btn" id="open-modal-btn">+ إضافة قاعدة رد جديدة</button>
             </div>
 
             <table>
@@ -222,5 +317,91 @@
         </div>
     </div>
 
+    <!-- هيكل النافذة المنبثقة المضافة حديثاً -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-box">
+            <h3>إضافة قاعدة رد تلقائي جديدة</h3>
+            <form id="reply-form">
+                <div class="form-group">
+                    <label>الكلمة المفتاحية (الكلمة المسببة للرد)</label>
+                    <input type="text" id="keyword-input" placeholder="مثال: السلام عليكم، تفاصيل" required>
+                </div>
+                <div class="form-group">
+                    <label>نص الرد التلقائي الذكي</label>
+                    <textarea id="reply-input" rows="4" placeholder="اكتب الرد الذي سيصل للعميل تلقائياً..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>ربط بالجدول الداخلي</label>
+                    <select id="table-select">
+                        <option value="الجدول الأول">الجدول الأول</option>
+                        <option value="الجدول الثاني">الجدول الثاني</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" id="close-modal-btn">إلغاء</button>
+                    <button type="submit" class="add-btn">حفظ القاعدة</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- برمجة تفاعل الأزرار وإضافة البيانات للجدول مؤقتاً قبل الربط النهائي بـ Supabase -->
+    <script>
+        const openModalBtn = document.getElementById('open-modal-btn');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const replyForm = document.getElementById('reply-form');
+        const dataTableBody = document.getElementById('data-table-body');
+        const totalRepliesElement = document.getElementById('total-replies');
+
+        let currentCount = 2;
+
+        // فتح النافذة
+        openModalBtn.addEventListener('click', () => {
+            modalOverlay.classList.add('active');
+        });
+
+        // إغلاق النافذة
+        closeModalBtn.addEventListener('click', () => {
+            modalOverlay.classList.remove('active');
+            replyForm.reset();
+        });
+
+        // إغلاق عند الضغط خارج المربع
+        modalOverlay.addEventListener('click', (e) => {
+            if(e.target === modalOverlay) {
+                modalOverlay.classList.remove('active');
+                replyForm.reset();
+            }
+        });
+
+        // استقبال البيانات وإضافتها للجدول
+        replyForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const keyword = document.getElementById('keyword-input').value;
+            const replyText = document.getElementById('reply-input').value;
+            const selectedTable = document.getElementById('table-select').value;
+
+            // إنشاء سطر جديد في الجدول بشكل فوري
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><span class="badge">${keyword}</span></td>
+                <td>${replyText}</td>
+                <td>${selectedTable}</td>
+                <td style="color: #2ecc71;">نشط</td>
+            `;
+
+            dataTableBody.appendChild(newRow);
+
+            // تحديث عداد الإحصائيات
+            currentCount++;
+            totalRepliesElement.textContent = currentCount;
+
+            // إغلاق النافذة وتنظيف النموذج
+            modalOverlay.classList.remove('active');
+            replyForm.reset();
+        });
+    </script>
 </body>
 </html>
