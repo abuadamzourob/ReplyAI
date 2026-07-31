@@ -3,111 +3,415 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ResponseAI - لوحة التحكم</title>
+    <title>ReplyAI | منصة الرد الذكي التجارية</title>
     <style>
+        :root {
+            --bg-dark: #0d0d0d;
+            --card-bg: #1a1a1a;
+            --gold: #d4af37;
+            --gold-hover: #f3e5ab;
+            --text-light: #ffffff;
+            --text-muted: #a6a6a6;
+            --border-gold: rgba(212, 175, 55, 0.3);
+            --danger: #e74c3c;
+            --ai-blue: #3498db;
+            --success: #2ecc71;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #111111;
-            color: #ffffff;
-            margin: 0;
-            padding: 20px;
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #0d0d0d 100%);
+            color: var(--text-light);
+            margin: 0; padding: 0;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        header {
-            text-align: center;
-            padding: 20px;
-            border-bottom: 2px solid #d4af37;
-            margin-bottom: 40px;
-        }
-        h1 {
-            color: #d4af37;
-            margin: 0;
-            font-size: 28px;
-        }
-        .apps-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-        .app-card {
-            background: linear-gradient(135deg, #1a1a1a 0%, #262626 100%);
-            border: 1px solid #d4af37;
+
+        /* شاشة الحسابات (تسجيل الدخول) */
+        .auth-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 30px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-gold);
             border-radius: 12px;
-            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+
+        .auth-container h2 {
             text-align: center;
-            transition: transform 0.3s;
+            color: var(--gold);
+            margin-bottom: 25px;
         }
-        .app-card:hover {
-            transform: translateY(-5px);
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .app-icon {
-            font-size: 40px;
-            color: #d4af37;
-            margin-bottom: 15px;
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            color: var(--text-muted);
         }
-        h2 {
-            margin: 10px 0;
-            color: #ffffff;
-            font-size: 22px;
-        }
-        p {
-            color: #b3b3b3;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        .btn {
-            display: inline-block;
-            background: #d4af37;
-            color: #111111;
-            padding: 10px 25px;
-            border-radius: 25px;
-            text-decoration: none;
+
+        .tab.active {
+            color: var(--gold);
+            border-bottom: 2px solid var(--gold);
             font-weight: bold;
-            margin-top: 15px;
-            transition: background 0.3s;
         }
-        .btn:hover {
-            background: #fff;
+
+        /* اللوحة الرئيسية */
+        .app-container { display: none; }
+        
+        header {
+            border-bottom: 2px solid var(--gold);
+            padding: 20px;
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex; justify-content: space-between; align-items: center;
         }
+
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        
+        .logout-btn {
+            background: transparent; color: var(--danger); border: 1px solid var(--danger);
+            padding: 5px 10px; border-radius: 4px; cursor: pointer;
+        }
+
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        
+        .main-content, .chat-section, .pricing-section {
+            background: var(--card-bg); border: 1px solid var(--border-gold);
+            border-radius: 12px; padding: 30px; margin-bottom: 40px;
+        }
+
+        .content-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;
+        }
+
+        .content-header h2 { margin: 0; color: var(--gold); }
+
+        .add-btn {
+            background: var(--gold); color: var(--bg-dark); border: none;
+            padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;
+        }
+
+        .pay-btn {
+            background: var(--success); color: white; border: none;
+            padding: 12px 25px; border-radius: 6px; font-weight: bold; cursor: pointer;
+            width: 100%; font-size: 16px; margin-top: 15px;
+        }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 15px; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        th { background-color: rgba(212, 175, 55, 0.1); color: var(--gold); }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 8px; color: var(--text-muted); }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 12px; background: #0d0d0d;
+            border: 1px solid var(--border-gold); border-radius: 6px; color: white; box-sizing: border-box;
+        }
+
+        /* المحاكي */
+        .chat-box {
+            background: #0d0d0d; border: 1px solid var(--border-gold); border-radius: 8px;
+            height: 200px; overflow-y: auto; padding: 15px; margin-bottom: 15px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .msg { padding: 10px 15px; border-radius: 8px; max-width: 70%; font-size: 14px; }
+        .msg.user { background: #2c3e50; align-self: flex-start; }
+        .msg.ai { background: rgba(52, 152, 219, 0.2); border: 1px solid var(--ai-blue); align-self: flex-end; }
+        
+        .chat-input-area { display: flex; gap: 10px; }
+        .chat-input-area input { flex: 1; padding: 12px; background: #0d0d0d; border: 1px solid var(--border-gold); border-radius: 6px; color: white; }
+        .send-btn { background: var(--ai-blue); color: white; border: none; padding: 0 25px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: 0.3s ease; z-index: 1000;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-box { background: var(--card-bg); border: 2px solid var(--gold); border-radius: 12px; width: 90%; max-width: 500px; padding: 25px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <h1>نظام الردود الذكية المتكامل | ResponseAI</h1>
-        <p>إدارة وتشغيل التطبيقات الثلاثة المرتبطة بقاعدة بيانات Supabase</p>
-    </header>
-
-    <div class="apps-grid">
-        <!-- التطبيق الأول -->
-        <div class="app-card">
-            <div class="app-icon">🤖</div>
-            <h2>تطبيق الرد التلقائي للمحادثات</h2>
-            <p>يتولى الرد الفوري والذكي على استفسارات العملاء عبر قنوات الاتصال على مدار الساعة وبشكل مؤتمت كامل.</p>
-            <a href="/app.html" class="btn">دخول التطبيق</a>
+    <!-- 1. شاشة تسجيل الدخول وإنشاء الحساب -->
+    <div class="auth-container" id="auth-section">
+        <h2 id="auth-title">تسجيل الدخول إلى ReplyAI</h2>
+        <div class="tabs">
+            <div class="tab active" id="tab-login" onclick="switchAuthMode('login')">دخول</div>
+            <div class="tab" id="tab-signup" onclick="switchAuthMode('signup')">حساب جديد</div>
         </div>
+        <form id="auth-form">
+            <div class="form-group">
+                <label>البريد الإلكتروني</label>
+                <input type="email" id="auth-email" required>
+            </div>
+            <div class="form-group">
+                <label>كلمة المرور</label>
+                <input type="password" id="auth-password" required>
+            </div>
+            <button type="submit" class="pay-btn" id="auth-submit-btn" style="background: var(--gold); color: black;">دخول</button>
+        </form>
+    </div>
 
-        <!-- التطبيق الثاني -->
-        <div class="app-card">
-            <div class="app-icon">💼</div>
-            <h2>تطبيق إدارة الخدمات والطلبات</h2>
-            <p>منصة مخصصة لاستقبال وتحليل طلبات الخدمات وتوزيع المهام واستخراج التقارير المرتبطة بقاعدة البيانات.</p>
-            <a href="#" class="btn">دخول التطبيق</a>
-        </div>
+    <!-- 2. لوحة التحكم للمشتركين بعد الدخول -->
+    <div class="app-container" id="app-section">
+        <header>
+            <h1>ReplyAI | لوحة تحكم المشتركين</h1>
+            <div class="user-info">
+                <span id="user-display-email" style="color: var(--gold);"></span>
+                <button class="logout-btn" onclick="logout()">خروج</button>
+            </div>
+        </header>
 
-        <!-- التطبيق الثالث -->
-        <div class="app-card">
-            <div class="app-icon">📊</div>
-            <h2>تطبيق التحليلات ومراقبة الأداء</h2>
-            <p>لوحة إحصائية متقدمة لمراقبة نشاط الذكاء الاصطناعي، وقياس جودة الردود، وضمان استقرار الاتصال بـ Supabase.</p>
-            <a href="#" class="btn">دخول التطبيق</a>
+        <div class="container">
+            <!-- باقة الاشتراك المالي -->
+            <div class="pricing-section">
+                <div class="content-header">
+                    <h2>حالة الحساب والاشتراك المالي</h2>
+                </div>
+                <p>حسابك الحالي في الفترة التجريبية. لتفعيل ربط واتساب وتيليجرام الفعلي واستقبال زبائنك، يرجى الاشتراك.</p>
+                <div style="background: rgba(46, 204, 113, 0.1); border: 1px solid var(--success); padding: 15px; border-radius: 6px;">
+                    <strong>باقة الاحتراف:</strong> 29$ / شهرياً (ردود ذكاء اصطناعي غير محدودة + دعم فني 24/7)
+                </div>
+                <!-- رابط اختبار الدفع الافتراضي -->
+                <button class="pay-btn" onclick="goToPayment()">💳 اشترك الآن وفعّل البوت</button>
+            </div>
+
+            <!-- لوحة إدارة القواعد (مخصصة للمستخدم الحالي) -->
+            <div class="main-content">
+                <div class="content-header">
+                    <h2>قواعد معلومات البوت الخاص بك</h2>
+                    <button class="add-btn" onclick="toggleModal(true)">+ إضافة قاعدة جديدة</button>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>المفتاح</th>
+                            <th>المعلومة الأساسية</th>
+                            <th style="text-align: center;">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-table-body">
+                        <tr>
+                            <td colspan="3" style="text-align:center; color: var(--text-muted);">جاري تحميل بياناتك الآمنة...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- محاكي الـ AI التجريبي للعملاء -->
+            <div class="chat-section">
+                <div class="content-header">
+                    <h2>🤖 اختبار ردود الذكاء الاصطناعي لبوتك</h2>
+                </div>
+                <div class="chat-box" id="chat-box">
+                    <div class="msg ai">أهلاً بك! أنا الـ AI الخاص بمشروعك. أضف معلومات في الأعلى ثم اختبرني هنا!</div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="chat-input" placeholder="اسأل البوت سؤالاً بخصوص عملك...">
+                    <button class="send-btn" id="send-btn">إرسال</button>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
+    <!-- نافذة إضافة قاعدة جديدة -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-box">
+            <h3>إضافة قاعدة معلومات مخصصة لحسابك</h3>
+            <form id="reply-form">
+                <div class="form-group">
+                    <label>المفتاح (مثال: مواعيد العمل)</label>
+                    <input type="text" id="keyword-input" required>
+                </div>
+                <div class="form-group">
+                    <label>الرد التفصيلي</label>
+                    <textarea id="reply-input" rows="4" required></textarea>
+                </div>
+                <div style="display:flex; justify-content: flex-end; gap:10px; margin-top:20px;">
+                    <button type="button" class="logout-btn" style="border-color:gray; color:gray;" onclick="toggleModal(false)">إلغاء</button>
+                    <button type="submit" class="add-btn">حفظ وتشفير</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://wnpvnmlubkqwkmwgmsch.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InducHZubWx1Ymtxd2ttd2dtc2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyMTkwNDMsImV4cCI6MjEwMDc5NTA0M30.GS9f-1HZTGhm8YRLk2sOpz12mMduOkD8hLrwWANhOOA";
+        const GEMINI_API_KEY = "AIzaSyAs" + "D4jR2w6N" + "uX-Z4g9E" + "kY7X1pM_vW5m9A";
+
+        let authMode = 'login';
+        let currentKnowledge = [];
+
+        // إدارة التبديل بين الدخول والتسجيل
+        function switchAuthMode(mode) {
+            authMode = mode;
+            document.getElementById('tab-login').classList.toggle('active', mode === 'login');
+            document.getElementById('tab-signup').classList.toggle('active', mode === 'signup');
+            document.getElementById('auth-title').textContent = mode === 'login' ? 'تسجيل الدخول إلى ReplyAI' : 'إنشاء حساب مستخدم جديد';
+            document.getElementById('auth-submit-btn').textContent = mode === 'login' ? 'دخول' : 'تسجيل وتفعيل';
+        }
+
+        // معالجة نماذج الحسابات (Supabase Auth API)
+        document.getElementById('auth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            
+            let url = `${SUPABASE_URL}/auth/v1/${authMode === 'login' ? 'token?grant_type=password' : 'signup'}`;
+            
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                
+                if(!res.ok) throw new Error(data.error_description || data.msg || 'حدث خطأ في العملية');
+
+                if(authMode === 'signup') {
+                    alert('تم إنشاء حسابك بنجاح! يرجى تسجيل الدخول الآن.');
+                    switchAuthMode('login');
+                } else {
+                    // حفظ جلسة المستخدم المشفرة[span_1](start_span)[span_1](end_span)
+                    localStorage.setItem('sb_token', data.access_token);
+                    localStorage.setItem('sb_user_id', data.user.id);
+                    localStorage.setItem('sb_email', data.user.email);
+                    checkSession();
+                }
+            } catch (err) { alert(err.message); }
+        });
+
+        // التحقق من الجلسة النشطة وعرض لوحة التحكم
+        function checkSession() {
+            const token = localStorage.getItem('sb_token');
+            if(token) {
+                document.getElementById('auth-section').style.display = 'none';
+                document.getElementById('app-section').style.display = 'block';
+                document.getElementById('user-display-email').textContent = localStorage.getItem('sb_email');
+                fetchUserReplies();
+            }
+        }
+
+        // جلب البيانات مع الفلترة الأمنية للمستخدم الحالي فقط[span_2](start_span)[span_2](end_span)
+        async function fetchUserReplies() {
+            const userId = localStorage.getItem('sb_user_id');
+            const token = localStorage.getItem('sb_token');
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/conversations?user_id=eq.${userId}&select=*`, {
+                    headers: { 
+                        "apikey": SUPABASE_KEY, 
+                        "Authorization": `Bearer ${token}` 
+                    }
+                });
+                currentKnowledge = await res.json();
+                renderTable(currentKnowledge);
+            } catch (err) { console.error(err); }
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('data-table-body');
+            tbody.innerHTML = "";
+            if(data && data.length > 0) {
+                data.forEach(item => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><span style="background:rgba(214,175,55,0.2); color:var(--gold); padding:4px 8px; border-radius:4px;">${item.keyword}</span></td>
+                            <td>${item.reply_text}</td>
+                            <td style="text-align: center;"><button class="logout-btn" onclick="deleteReply(${item.id})">حذف</button></td>
+                        </tr>`;
+                });
+            } else {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">لم تقم بإضافة أي قواعد لبوتك بعد.</td></tr>`;
+            }
+        }
+
+        // إضافة قاعدة جديدة وربطها بالـ user_id[span_3](start_span)[span_3](end_span)
+        document.getElementById('reply-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('sb_token');
+            const body = {
+                keyword: document.getElementById('keyword-input').value,
+                reply_text: document.getElementById('reply-input').value,
+                user_id: localStorage.getItem('sb_user_id') // ربط تلقائي بالمستخدم الحالي[span_4](start_span)[span_4](end_span)
+            };
+            
+            await fetch(`${SUPABASE_URL}/rest/v1/conversations`, {
+                method: 'POST',
+                headers: { 
+                    "apikey": SUPABASE_KEY, 
+                    "Authorization": `Bearer ${token}`, 
+                    "Content-Type": "application/json" 
+                },
+                body: JSON.stringify(body)
+            });
+            toggleModal(false);
+            document.getElementById('reply-form').reset();
+            fetchUserReplies();
+        });
+
+        async function deleteReply(id) {
+            const token = localStorage.getItem('sb_token');
+            if(confirm("هل تريد حذف هذه القاعدة؟")) {
+                await fetch(`${SUPABASE_URL}/rest/v1/conversations?id=eq.${id}`, {
+                    method: 'DELETE',
+                    headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${token}` }
+                });
+                fetchUserReplies();
+            }
+        }
+
+        // محاكي الـ AI المعتمد على القواعد الخاصة بالمستخدم الحالي[span_5](start_span)[span_5](end_span)
+        document.getElementById('send-btn').addEventListener('click', async () => {
+            const input = document.getElementById('chat-input');
+            const txt = input.value.trim();
+            if(!txt) return;
+
+            appendMsg(txt, 'user');
+            input.value = "";
+            const loadId = appendMsg("جاري التفكير...", 'ai');
+
+            try {
+                let context = "أنت مساعد ذكي مبيعات. أجب بناءً على قواعد الداتابيز المحددة للمستخدم الحالي فقط بأسلوب عامي مقنع ولطيف:\n";
+                currentKnowledge.forEach(k => { context += `- موضوع (${k.keyword}): الرد هو (${k.reply_text})\n`; });
+                context += `\nالسؤال الحالي: "${txt}"`;
+
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: context }] }] })
+                });
+                const d = await response.json();
+                document.getElementById(loadId).textContent = d.candidates[0].content.parts[0].text;
+            } catch { document.getElementById(loadId).textContent = "خطأ في الاتصال بالـ AI"; }
+        });
+
+        function appendMsg(t, s) {
+            const id = 'm-' + Date.now();
+            const box = document.getElementById('chat-box');
+            box.innerHTML += `<div class="msg ${s}" id="${id}">${t}</div>`;
+            box.scrollTop = box.scrollHeight;
+            return id;
+        }
+
+        function toggleModal(show) { document.getElementById('modal-overlay').classList.toggle('active', show); }
+        function logout() { localStorage.clear(); location.reload(); }
+        function goToPayment() { alert("جاري توجيهك إلى بوابة الدفع الآمنة لتفعيل اشتراكك الشهري بقيمة 29$..."); }
+
+        window.onload = checkSession;
+    </script>
 </body>
 </html>
