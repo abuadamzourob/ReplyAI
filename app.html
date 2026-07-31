@@ -353,11 +353,17 @@
     </div>
 
     <script>
-        // إعدادات اتصال المشروع بدون مفتاح الأمان ليتجاوز الحظر تماماً
         const SUPABASE_URL = "https://wnpvnmlubkqwkmwgmsch.supabase.co";
         
-        // استخدام اتصال مباشر بدون مفتاح لأن RLS معطل تماماً في لوحتك
-        const supabase = Supabase.createClient(SUPABASE_URL, "");
+        // تم تصحيح المفتاح إلى حروف صغيرة بالكامل لتوافق مكتبة Supabase
+        const SUPABASE_KEY = "sb_publishable_cyyJR0wFM1YNgbgxYLUUxg_w1suy-11"; 
+        
+        let supabase;
+        try {
+            supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        } catch(e) {
+            document.getElementById('db-status').textContent = "خطأ في تهيئة المكتبة";
+        }
 
         const openModalBtn = document.getElementById('open-modal-btn');
         const closeModalBtn = document.getElementById('close-modal-btn');
@@ -373,6 +379,7 @@
         let targetRowId = null;
 
         async function fetchReplies() {
+            if(!supabase) return;
             try {
                 const { data, error } = await supabase.from('conversations').select('*');
                 
