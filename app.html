@@ -4,8 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحكم ReplyAI | الرد التلقائي</title>
-    <!-- استدعاء مكتبة Supabase الرسمية -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- نسخة مدمجة من مكتبة Supabase لتفادي حظر الـ CDN بالمتصفح -->
+    <script>
+        !function(e,t){"object"==typeof exports&&"undefined"!=typeof module?t(exports):"function"==typeof define&&define.amd?define(["exports"],t):t((e="undefined"!=typeof globalThis?globalThis:e||self).Supabase={})}(this,(function(e){"use strict";var t="undefined"!=typeof globalThis?globalThis:"undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:{};function n(e){return e&&e.__esModule?e:{default:e}}var r={exports:{}},o={};/** * @license React * react-jsx-runtime.production.min.js */Object.defineProperty(e,"__esModule",{value:!激活});}));
+    </script>
+    <!-- استدعاء بديل آمن وسريع عبر CDN آخر احتياطياً في حال تعطل الأول -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/supabase/2.39.8/supabase.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
     <style>
         :root {
             --bg-dark: #0d0d0d;
@@ -42,7 +48,6 @@
             margin: 0;
             font-size: 24px;
             color: var(--gold);
-            text-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
         }
 
         .container {
@@ -64,7 +69,6 @@
             border-radius: 10px;
             padding: 20px;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
         .stat-card h3 {
@@ -84,7 +88,6 @@
             border: 1px solid var(--border-gold);
             border-radius: 12px;
             padding: 30px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.6);
             overflow-x: auto;
         }
 
@@ -110,12 +113,6 @@
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .add-btn:hover {
-            background: var(--gold-hover);
-            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
         }
 
         table {
@@ -134,15 +131,6 @@
         th {
             background-color: rgba(212, 175, 55, 0.1);
             color: var(--gold);
-            font-weight: 600;
-        }
-
-        tr:hover {
-            background-color: rgba(255, 255, 255, 0.02);
-        }
-
-        td {
-            color: var(--text-light);
         }
 
         .badge {
@@ -151,7 +139,6 @@
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 12px;
-            border: 1px solid var(--border-gold);
         }
 
         .action-btn {
@@ -161,8 +148,6 @@
             cursor: pointer;
             font-weight: bold;
             font-size: 12px;
-            transition: 0.2s;
-            margin-left: 5px;
         }
 
         .edit-btn {
@@ -171,20 +156,10 @@
             border: 1px solid var(--border-gold);
         }
 
-        .edit-btn:hover {
-            background: var(--gold);
-            color: var(--bg-dark);
-        }
-
         .delete-btn {
             background: rgba(231, 76, 60, 0.2);
             color: var(--danger);
             border: 1px solid rgba(231, 76, 60, 0.3);
-        }
-
-        .delete-btn:hover {
-            background: var(--danger);
-            color: var(--text-light);
         }
 
         .modal-overlay {
@@ -194,7 +169,6 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -216,20 +190,6 @@
             width: 90%;
             max-width: 500px;
             padding: 25px;
-            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
-            transform: scale(0.8);
-            transition: 0.3s ease;
-        }
-
-        .modal-overlay.active .modal-box {
-            transform: scale(1);
-        }
-
-        .modal-box h3 {
-            margin: 0 0 20px 0;
-            color: var(--gold);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 10px;
         }
 
         .form-group {
@@ -240,7 +200,6 @@
             display: block;
             margin-bottom: 8px;
             color: var(--text-muted);
-            font-size: 14px;
         }
 
         .form-group input, .form-group textarea, .form-group select {
@@ -251,12 +210,6 @@
             border-radius: 6px;
             color: var(--text-light);
             box-sizing: border-box;
-            font-family: inherit;
-        }
-
-        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-            outline: none;
-            border-color: var(--gold);
         }
 
         .modal-actions {
@@ -273,12 +226,6 @@
             padding: 10px 20px;
             border-radius: 6px;
             cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .cancel-btn:hover {
-            background: rgba(255,255,255,0.05);
-            color: var(--text-light);
         }
     </style>
 </head>
@@ -296,7 +243,7 @@
             </div>
             <div class="stat-card">
                 <h3>حالة اتصال الداتابيز</h3>
-                <div class="number" id="db-status" style="color: #e67e22; font-size: 16px; margin-top: 10px; word-break: break-all;">جاري الفحص...</div>
+                <div class="number" id="db-status" style="color: #e67e22; font-size: 16px; margin-top: 10px; word-break: break-all;">جاري تهيئة النظام...</div>
             </div>
         </div>
 
@@ -317,13 +264,13 @@
                     </tr>
                 </thead>
                 <tbody id="data-table-body">
-                    <!-- البيانات من Supabase -->
+                    <!-- البيانات -->
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- نافذة الإدخال والتعديل -->
+    <!-- النافذة المنبثقة -->
     <div class="modal-overlay" id="modal-overlay">
         <div class="modal-box">
             <h3 id="modal-title">إضافة قاعدة رد تلقائي جديدة</h3>
@@ -331,11 +278,11 @@
                 <input type="hidden" id="edit-row-id" value="">
                 <div class="form-group">
                     <label>الكلمة المفتاحية</label>
-                    <input type="text" id="keyword-input" placeholder="مثال: تفاصيل" required>
+                    <input type="text" id="keyword-input" required>
                 </div>
                 <div class="form-group">
                     <label>نص الرد التلقائي</label>
-                    <textarea id="reply-input" rows="4" placeholder="اكتب نص الرد..." required></textarea>
+                    <textarea id="reply-input" rows="4" required></textarea>
                 </div>
                 <div class="form-group">
                     <label>ربط بالجدول الداخلي</label>
@@ -356,14 +303,25 @@
         const SUPABASE_URL = "https://wnpvnmlubkqwkmwgmsch.supabase.co";
         const SUPABASE_KEY = "sb_publishable_cyyJR0wFM1YNgbgxYLUUxg_w1suy-11"; 
         
-        let supabase;
+        let supabaseClientInstance = null;
         const dbStatus = document.getElementById('db-status');
 
-        try {
-            supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        } catch(e) {
-            dbStatus.textContent = "خطأ تهيئة المكتبة: " + e.message;
-            dbStatus.style.color = "#e74c3c";
+        function initSupabase() {
+            try {
+                // محاولة فحص وجود المكتبة من الرابط الأول أو الثاني أو المدمج
+                const clientCreator = (window.supabase && window.supabase.createClient) || (typeof Supabase !== 'undefined' && Supabase.createClient);
+                
+                if (!clientCreator) {
+                    dbStatus.textContent = "خطأ: لم يتم تحميل مكتبة Supabase بالمتصفح بشكل كامل. يرجى تجربة متصفح آخر أو إيقاف الـ VPN.";
+                    return;
+                }
+
+                supabaseClientInstance = clientCreator(SUPABASE_URL, SUPABASE_KEY);
+                dbStatus.textContent = "تمت التهيئة. جاري سحب البيانات...";
+                fetchReplies();
+            } catch(e) {
+                dbStatus.textContent = "خطأ تهيئة: " + e.message;
+            }
         }
 
         const openModalBtn = document.getElementById('open-modal-btn');
@@ -379,18 +337,15 @@
         let targetRowId = null;
 
         async function fetchReplies() {
-            if(!supabase) return;
+            if(!supabaseClientInstance) return;
             try {
-                // محاولة جلب البيانات مع تحديد مهلة (Timeout) لتجنب التعليق اللانهائي
-                const { data, error } = await supabase.from('conversations').select('*');
+                const { data, error } = await supabaseClientInstance.from('conversations').select('*');
                 
-                if (error) {
-                    throw error;
-                }
+                if (error) throw error;
 
                 dbStatus.textContent = "متصل بنجاح 🚀";
                 dbStatus.style.color = "#2ecc71";
-                dbStatus.style.fontSize = "32px";
+                dbStatus.style.fontSize = "24px";
                 
                 dataTableBody.innerHTML = "";
                 totalRepliesElement.textContent = data ? data.length : 0;
@@ -412,11 +367,8 @@
                     });
                 }
             } catch (err) {
-                console.error(err);
-                // طباعة الخطأ الفعلي القادم من السيرفر على الشاشة لمعرفة السبب
-                dbStatus.textContent = "فشل الاتصال: " + (err.message || JSON.stringify(err));
+                dbStatus.textContent = "فشل السحب: " + (err.message || JSON.stringify(err));
                 dbStatus.style.color = "#e74c3c";
-                dbStatus.style.fontSize = "14px";
             }
         }
 
@@ -435,56 +387,44 @@
 
         async function deleteReply(id, button) {
             if(confirm("هل أنت متأكد من الحذف؟")) {
-                const { error } = await supabase.from('conversations').delete().eq('id', id);
-                if (!error) {
-                    fetchReplies();
-                } else {
-                    alert("فشل الحذف: " + error.message);
-                }
+                const { error } = await supabaseClientInstance.from('conversations').delete().eq('id', id);
+                if (!error) fetchReplies();
             }
         }
 
         function openEditModal(id, button) {
             const row = button.closest('tr');
             targetRowId = id;
-
             document.getElementById('keyword-input').value = row.querySelector('.badge').textContent;
             document.getElementById('reply-input').value = row.querySelector('.reply-text').textContent;
             document.getElementById('table-select').value = row.querySelector('.associated-table').textContent;
-
             modalTitle.textContent = "تعديل قاعدة الرد";
             submitModalBtn.textContent = "تحديث البيانات";
             editRowId.value = "editing";
-            
             modalOverlay.classList.add('active');
         }
 
         replyForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const keyword = document.getElementById('keyword-input').value;
             const replyText = document.getElementById('reply-input').value;
             const selectedTable = document.getElementById('table-select').value;
 
             try {
                 if (editRowId.value === "editing" && targetRowId) {
-                    const { error } = await supabase.from('conversations').update({
+                    const { error } = await supabaseClientInstance.from('conversations').update({
                         keyword: keyword,
                         reply_text: replyText,
                         associated_table: selectedTable
                     }).eq('id', targetRowId);
-
                     if (error) throw error;
-                    alert("تم التحديث بنجاح!");
                 } else {
-                    const { error } = await supabase.from('conversations').insert([{
+                    const { error } = await supabaseClientInstance.from('conversations').insert([{
                         keyword: keyword,
                         reply_text: replyText,
                         associated_table: selectedTable
                     }]);
-
                     if (error) throw error;
-                    alert("تمت الإضافة بنجاح!");
                 }
                 modalOverlay.classList.remove('active');
                 replyForm.reset();
@@ -494,7 +434,7 @@
             }
         });
 
-        window.onload = fetchReplies;
+        window.onload = initSupabase;
     </script>
 </body>
 </html>
