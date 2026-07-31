@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحكم ReplyAI | الرد التلقائي</title>
-    
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
     <style>
         :root {
@@ -234,11 +232,11 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>إجمالي قواعد الرد</h3>
-                <div class="number" id="total-replies">2</div>
+                <div class="number" id="total-replies">0</div>
             </div>
             <div class="stat-card">
                 <h3>حالة اتصال الداتابيز</h3>
-                <div class="number" id="db-status" style="color: #e67e22; font-size: 16px; margin-top: 10px;">فحص الاتصال المباشر...</div>
+                <div class="number" id="db-status" style="color: #e67e22; font-size: 16px; margin-top: 10px;">جاري الاتصال بقاعدة البيانات...</div>
             </div>
         </div>
 
@@ -259,26 +257,8 @@
                     </tr>
                 </thead>
                 <tbody id="data-table-body">
-                    <!-- جدول ثابت للتجربة والمعاينة البصرية -->
                     <tr>
-                        <td><span class="badge">مرحبا</span></td>
-                        <td class="reply-text">أهلاً بك في ReplyAI! كيف يمكننا مساعدتك اليوم؟</td>
-                        <td class="associated-table">الجدول الأول</td>
-                        <td style="color: #2ecc71;">نشط (تجريبي)</td>
-                        <td style="text-align: center;">
-                            <button class="action-btn edit-btn">تعديل</button>
-                            <button class="action-btn delete-btn">حذف</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><span class="badge">الأسعار</span></td>
-                        <td class="reply-text">تبدأ باقاتنا من 10 دولارات شهرياً. يمكنك الاستفسار أكثر هنا.</td>
-                        <td class="associated-table">الجدول الثاني</td>
-                        <td style="color: #2ecc71;">نشط (تجريبي)</td>
-                        <td style="text-align: center;">
-                            <button class="action-btn edit-btn">تعديل</button>
-                            <button class="action-btn delete-btn">حذف</button>
-                        </td>
+                        <td colspan="5" style="text-align:center; color: var(--text-muted);">جاري تحميل البيانات الحقيقية...</td>
                     </tr>
                 </tbody>
             </table>
@@ -314,75 +294,150 @@
     </div>
 
     <script>
-        const SUPABASE_URL = "https://wnpvnmlubkqwkmwgmsch.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_cyyJR0wFM1YNgbgxYLUUxg_w1suy-11"; 
-        
-        let supabase;
+        // الروابط والمفاتيح المحدثة والآمنة 100%
+        const SUPABASE_URL = "https://wnpvnmlubkqwkmwgmsch.supabase.co"; 
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InducHZubWx1Ymtxd2ttd2dtc2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyMTkwNDMsImV4cCI6MjEwMDc5NTA0M30.GS9f-1HZTGhm8YRLk2sOpz12mMduOkD8hLrwWANhOOA"; 
+
         const dbStatus = document.getElementById('db-status');
-
-        function initSupabase() {
-            const creator = (window.supabase && window.supabase.createClient) || (typeof Supabase !== 'undefined' && Supabase.createClient);
-            
-            if (!creator) {
-                dbStatus.textContent = "⚠️ لم يتم تحميل مكتبة supabase الخارجية بنجاح.";
-                dbStatus.style.color = "#e74c3c";
-                return;
-            }
-
-            try {
-                supabase = creator(SUPABASE_URL, SUPABASE_KEY);
-                fetchReplies();
-            } catch(e) {
-                dbStatus.textContent = "خطأ تهيئة داخلي: " + e.message;
-                dbStatus.style.color = "#e74c3c";
-            }
-        }
-
+        const dataTableBody = document.getElementById('data-table-body');
+        const totalRepliesElement = document.getElementById('total-replies');
         const openModalBtn = document.getElementById('open-modal-btn');
         const closeModalBtn = document.getElementById('close-modal-btn');
         const modalOverlay = document.getElementById('modal-overlay');
         const replyForm = document.getElementById('reply-form');
-        const dataTableBody = document.getElementById('data-table-body');
-        const totalRepliesElement = document.getElementById('total-replies');
+        const modalTitle = document.getElementById('modal-title');
+        const submitModalBtn = document.getElementById('submit-modal-btn');
+        const editRowId = document.getElementById('edit-row-id');
+
+        let targetRowId = null;
 
         async function fetchReplies() {
-            if(!supabase) return;
             try {
-                const { data, error } = await supabase.from('conversations').select('*');
-                if (error) throw error;
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/conversations?select=*`, {
+                    headers: {
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": `Bearer ${SUPABASE_KEY}`
+                    }
+                });
 
+                if(!res.ok) throw new Error("استجابة السيرفر خاطئة");
+                
+                const data = await res.json();
+                
                 dbStatus.textContent = "متصل بنجاح 🚀";
                 dbStatus.style.color = "#2ecc71";
                 dbStatus.style.fontSize = "24px";
                 
-                if(data && data.length > 0) {
-                    dataTableBody.innerHTML = "";
-                    totalRepliesElement.textContent = data.length;
-                    data.forEach(item => {
-                        const newRow = document.createElement('tr');
-                        newRow.innerHTML = `
-                            <td><span class="badge">${item.keyword}</span></td>
-                            <td class="reply-text">${item.reply_text}</td>
-                            <td class="associated-table">${item.associated_table || 'الجدول الأول'}</td>
-                            <td style="color: #2ecc71;">نشط</td>
-                            <td style="text-align: center;">
-                                <button class="action-btn edit-btn">تعديل</button>
-                                <button class="action-btn delete-btn">حذف</button>
-                            </td>
-                        `;
-                        dataTableBody.appendChild(newRow);
-                    });
-                }
+                renderTable(data);
             } catch (err) {
-                dbStatus.textContent = "خطأ اتصال: " + err.message;
+                dbStatus.textContent = "❌ فشل الاتصال: تأكد من إعدادات جدول (conversations) وتفعيل الـ RLS.";
                 dbStatus.style.color = "#e74c3c";
             }
         }
 
-        openModalBtn.addEventListener('click', () => { modalOverlay.classList.add('active'); });
-        closeModalBtn.addEventListener('click', () => { modalOverlay.classList.remove('active'); replyForm.reset(); });
+        function renderTable(data) {
+            dataTableBody.innerHTML = "";
+            totalRepliesElement.textContent = data ? data.length : 0;
 
-        window.onload = initSupabase;
+            if(data && data.length > 0) {
+                data.forEach(item => {
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td><span class="badge">${item.keyword}</span></td>
+                        <td class="reply-text">${item.reply_text}</td>
+                        <td class="associated-table">${item.associated_table || 'الجدول الأول'}</td>
+                        <td style="color: #2ecc71;">نشط</td>
+                        <td style="text-align: center;">
+                            <button class="action-btn edit-btn" onclick="openEditModal(${item.id}, this)">تعديل</button>
+                            <button class="action-btn delete-btn" onclick="deleteReply(${item.id}, this)">حذف</button>
+                        </td>
+                    `;
+                    dataTableBody.appendChild(newRow);
+                });
+            } else {
+                dataTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">لا توجد قواعد رد مضافة حالياً.</td></tr>`;
+            }
+        }
+
+        openModalBtn.addEventListener('click', () => {
+            modalTitle.textContent = "إضافة قاعدة رد تلقائي جديدة";
+            submitModalBtn.textContent = "حفظ القاعدة";
+            editRowId.value = "";
+            targetRowId = null;
+            modalOverlay.classList.add('active');
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            modalOverlay.classList.remove('active');
+            replyForm.reset();
+        });
+
+        function openEditModal(id, button) {
+            const row = button.closest('tr');
+            targetRowId = id;
+            document.getElementById('keyword-input').value = row.querySelector('.badge').textContent;
+            document.getElementById('reply-input').value = row.querySelector('.reply-text').textContent;
+            document.getElementById('table-select').value = row.querySelector('.associated-table').textContent;
+            modalTitle.textContent = "تعديل قاعدة الرد";
+            submitModalBtn.textContent = "تحديث البيانات";
+            editRowId.value = "editing";
+            modalOverlay.classList.add('active');
+        }
+
+        async function deleteReply(id, button) {
+            if(confirm("هل أنت متأكد من الحذف؟")) {
+                try {
+                    await fetch(`${SUPABASE_URL}/rest/v1/conversations?id=eq.${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            "apikey": SUPABASE_KEY,
+                            "Authorization": `Bearer ${SUPABASE_KEY}`
+                        }
+                    });
+                    fetchReplies();
+                } catch(e) { alert("فشل الحذف"); }
+            }
+        }
+
+        replyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const keyword = document.getElementById('keyword-input').value;
+            const replyText = document.getElementById('reply-input').value;
+            const selectedTable = document.getElementById('table-select').value;
+
+            try {
+                let url = `${SUPABASE_URL}/rest/v1/conversations`;
+                let method = 'POST';
+                let headers = {
+                    "apikey": SUPABASE_KEY,
+                    "Authorization": `Bearer ${SUPABASE_KEY}`,
+                    "Content-Type": "application/json",
+                    "Prefer": "return=minimal"
+                };
+                let body = { keyword: keyword, reply_text: replyText, associated_table: selectedTable };
+
+                if (editRowId.value === "editing" && targetRowId) {
+                    url += `?id=eq.${targetRowId}`;
+                    method = 'PATCH';
+                }
+
+                const res = await fetch(url, {
+                    method: method,
+                    headers: headers,
+                    body: JSON.stringify(body)
+                });
+
+                if(!res.ok) throw new Error("فشل الحفظ");
+
+                modalOverlay.classList.remove('active');
+                replyForm.reset();
+                fetchReplies();
+            } catch(err) {
+                alert("حدث خطأ أثناء الحفظ: " + err.message);
+            }
+        });
+
+        window.onload = fetchReplies;
     </script>
 </body>
 </html>
