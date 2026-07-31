@@ -375,7 +375,7 @@
     </div>
 
     <script>
-        // إعدادات الاتصال بـ Supabase الخاصة بك ومحدثة بالكامل
+        // إعدادات مشروع ReplyAI المحدثة بالكامل لجدول conversations
         const SUPABASE_URL = "https://wnpvnmlubkqwkmwgmsch.supabase.co";
         const SUPABASE_KEY = "Sb_publishable_cyyJR0wFM1YNgbgxYLUUxg_w1suy-11";
         
@@ -394,10 +394,10 @@
 
         let targetRowId = null;
 
-        // جلب البيانات فور تحميل الصفحة من جدول chats
+        // جلب البيانات فور تحميل الصفحة من جدول conversations
         async function fetchReplies() {
             try {
-                const { data, error } = await supabase.from('chats').select('*');
+                const { data, error } = await supabase.from('conversations').select('*');
                 
                 if (error) throw error;
 
@@ -444,10 +444,10 @@
             replyForm.reset();
         });
 
-        // حذف سطر حقيقي من الداتابيز من جدول chats
+        // حذف سطر حقيقي من جدول conversations
         async function deleteReply(id, button) {
             if(confirm("هل أنت متأكد من حذف هذه القاعدة نهائياً من قاعدة البيانات؟")) {
-                const { error } = await supabase.from('chats').delete().eq('id', id);
+                const { error } = await supabase.from('conversations').delete().eq('id', id);
                 if (!error) {
                     button.closest('tr').remove();
                     fetchReplies();
@@ -473,7 +473,7 @@
             modalOverlay.classList.add('active');
         }
 
-        // إرسال البيانات (إضافة جديدة أو تحديث سطر قائم في جدول chats)
+        // إرسال البيانات (إضافة جديدة أو تحديث في جدول conversations)
         replyForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -483,7 +483,7 @@
 
             if (editRowId.value === "editing" && targetRowId) {
                 // تحديث في Supabase
-                const { error } = await supabase.from('chats').update({
+                const { error } = await supabase.from('conversations').update({
                     keyword: keyword,
                     reply_text: replyText,
                     associated_table: selectedTable
@@ -492,13 +492,13 @@
                 if (error) alert("فشل تحديث البيانات");
             } else {
                 // إضافة جديدة في Supabase
-                const { error } = await supabase.from('chats').insert([{
+                const { error } = await supabase.from('conversations').insert([{
                     keyword: keyword,
                     reply_text: replyText,
                     associated_table: selectedTable
                 }]);
 
-                if (error) alert("فشل إضافة القاعدة الجديدة. تأكد من مطابقة أسماء الحقول في جدولك (keyword, reply_text, associated_table)");
+                if (error) alert("فشل إضافة القاعدة الجديدة. تأكد من إضافة الأعمدة بالداتابيز أولاً");
             }
 
             modalOverlay.classList.remove('active');
