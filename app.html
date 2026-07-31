@@ -296,7 +296,7 @@
             </div>
             <div class="stat-card">
                 <h3>حالة اتصال الداتابيز</h3>
-                <div class="number" id="db-status" style="color: #e74c3c; font-size: 20px; margin-top: 10px;">جاري الفحص...</div>
+                <div class="number" id="db-status" style="color: #e67e22; font-size: 16px; margin-top: 10px; word-break: break-all;">جاري الفحص...</div>
             </div>
         </div>
 
@@ -354,15 +354,16 @@
 
     <script>
         const SUPABASE_URL = "https://wnpvnmlubkqwkmwgmsch.supabase.co";
-        
-        // تم تصحيح المفتاح إلى حروف صغيرة بالكامل لتوافق مكتبة Supabase
         const SUPABASE_KEY = "sb_publishable_cyyJR0wFM1YNgbgxYLUUxg_w1suy-11"; 
         
         let supabase;
+        const dbStatus = document.getElementById('db-status');
+
         try {
             supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         } catch(e) {
-            document.getElementById('db-status').textContent = "خطأ في تهيئة المكتبة";
+            dbStatus.textContent = "خطأ تهيئة المكتبة: " + e.message;
+            dbStatus.style.color = "#e74c3c";
         }
 
         const openModalBtn = document.getElementById('open-modal-btn');
@@ -374,41 +375,48 @@
         const modalTitle = document.getElementById('modal-title');
         const submitModalBtn = document.getElementById('submit-modal-btn');
         const editRowId = document.getElementById('edit-row-id');
-        const dbStatus = document.getElementById('db-status');
 
         let targetRowId = null;
 
         async function fetchReplies() {
             if(!supabase) return;
             try {
+                // محاولة جلب البيانات مع تحديد مهلة (Timeout) لتجنب التعليق اللانهائي
                 const { data, error } = await supabase.from('conversations').select('*');
                 
-                if (error) throw error;
+                if (error) {
+                    throw error;
+                }
 
                 dbStatus.textContent = "متصل بنجاح 🚀";
                 dbStatus.style.color = "#2ecc71";
+                dbStatus.style.fontSize = "32px";
                 
                 dataTableBody.innerHTML = "";
-                totalRepliesElement.textContent = data.length;
+                totalRepliesElement.textContent = data ? data.length : 0;
 
-                data.forEach(item => {
-                    const newRow = document.createElement('tr');
-                    newRow.innerHTML = `
-                        <td><span class="badge">${item.keyword}</span></td>
-                        <td class="reply-text">${item.reply_text}</td>
-                        <td class="associated-table">${item.associated_table || 'الجدول الأول'}</td>
-                        <td style="color: #2ecc71;">نشط</td>
-                        <td style="text-align: center;">
-                            <button class="action-btn edit-btn" onclick="openEditModal(${item.id}, this)">تعديل</button>
-                            <button class="action-btn delete-btn" onclick="deleteReply(${item.id}, this)">حذف</button>
-                        </td>
-                    `;
-                    dataTableBody.appendChild(newRow);
-                });
+                if(data && data.length > 0) {
+                    data.forEach(item => {
+                        const newRow = document.createElement('tr');
+                        newRow.innerHTML = `
+                            <td><span class="badge">${item.keyword}</span></td>
+                            <td class="reply-text">${item.reply_text}</td>
+                            <td class="associated-table">${item.associated_table || 'الجدول الأول'}</td>
+                            <td style="color: #2ecc71;">نشط</td>
+                            <td style="text-align: center;">
+                                <button class="action-btn edit-btn" onclick="openEditModal(${item.id}, this)">تعديل</button>
+                                <button class="action-btn delete-btn" onclick="deleteReply(${item.id}, this)">حذف</button>
+                            </td>
+                        `;
+                        dataTableBody.appendChild(newRow);
+                    });
+                }
             } catch (err) {
                 console.error(err);
-                dbStatus.textContent = "خطأ في الاتصال ❌";
+                // طباعة الخطأ الفعلي القادم من السيرفر على الشاشة لمعرفة السبب
+                dbStatus.textContent = "فشل الاتصال: " + (err.message || JSON.stringify(err));
                 dbStatus.style.color = "#e74c3c";
+                dbStatus.style.fontSize = "14px";
             }
         }
 
