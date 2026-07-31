@@ -5,12 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحكم ReplyAI | الرد التلقائي</title>
     
-    <!-- نسخة مدمجة من مكتبة Supabase لتفادي حظر الـ CDN بالمتصفح -->
-    <script>
-        !function(e,t){"object"==typeof exports&&"undefined"!=typeof module?t(exports):"function"==typeof define&&define.amd?define(["exports"],t):t((e="undefined"!=typeof globalThis?globalThis:e||self).Supabase={})}(this,(function(e){"use strict";var t="undefined"!=typeof globalThis?globalThis:"undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:{};function n(e){return e&&e.__esModule?e:{default:e}}var r={exports:{}},o={};/** * @license React * react-jsx-runtime.production.min.js */Object.defineProperty(e,"__esModule",{value:!激活});}));
-    </script>
-    <!-- استدعاء بديل آمن وسريع عبر CDN آخر احتياطياً في حال تعطل الأول -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/supabase/2.39.8/supabase.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- استدعاء المكتبة عبر UNPKG وهو سيرفر CDN مختلف كلياً ومفتوح دائماً -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
     <style>
         :root {
@@ -243,7 +239,7 @@
             </div>
             <div class="stat-card">
                 <h3>حالة اتصال الداتابيز</h3>
-                <div class="number" id="db-status" style="color: #e67e22; font-size: 16px; margin-top: 10px; word-break: break-all;">جاري تهيئة النظام...</div>
+                <div class="number" id="db-status" style="color: #e67e22; font-size: 16px; margin-top: 10px;">جاري الفحص...</div>
             </div>
         </div>
 
@@ -303,24 +299,26 @@
         const SUPABASE_URL = "https://wnpvnmlubkqwkmwgmsch.supabase.co";
         const SUPABASE_KEY = "sb_publishable_cyyJR0wFM1YNgbgxYLUUxg_w1suy-11"; 
         
-        let supabaseClientInstance = null;
+        let supabase;
         const dbStatus = document.getElementById('db-status');
 
         function initSupabase() {
-            try {
-                // محاولة فحص وجود المكتبة من الرابط الأول أو الثاني أو المدمج
-                const clientCreator = (window.supabase && window.supabase.createClient) || (typeof Supabase !== 'undefined' && Supabase.createClient);
-                
-                if (!clientCreator) {
-                    dbStatus.textContent = "خطأ: لم يتم تحميل مكتبة Supabase بالمتصفح بشكل كامل. يرجى تجربة متصفح آخر أو إيقاف الـ VPN.";
-                    return;
-                }
+            // محاولة التحقق من وجود المكتبة بأي طريقة كانت
+            const instanceCreator = (window.supabase && window.supabase.createClient) || (typeof Supabase !== 'undefined' && Supabase.createClient);
+            
+            if (!instanceCreator) {
+                dbStatus.textContent = "المتصفح يحظر مكتبة Supabase. جرب إيقاف الـ VPN مؤقتاً أو افتح من متصفح آخر.";
+                dbStatus.style.color = "#e74c3c";
+                return;
+            }
 
-                supabaseClientInstance = clientCreator(SUPABASE_URL, SUPABASE_KEY);
-                dbStatus.textContent = "تمت التهيئة. جاري سحب البيانات...";
+            try {
+                supabase = instanceCreator(SUPABASE_URL, SUPABASE_KEY);
+                dbStatus.textContent = "جاري الاتصال بقاعدة البيانات...";
                 fetchReplies();
             } catch(e) {
-                dbStatus.textContent = "خطأ تهيئة: " + e.message;
+                dbStatus.textContent = "خطأ في التهيئة: " + e.message;
+                dbStatus.style.color = "#e74c3c";
             }
         }
 
@@ -337,9 +335,9 @@
         let targetRowId = null;
 
         async function fetchReplies() {
-            if(!supabaseClientInstance) return;
+            if(!supabase) return;
             try {
-                const { data, error } = await supabaseClientInstance.from('conversations').select('*');
+                const { data, error } = await supabase.from('conversations').select('*');
                 
                 if (error) throw error;
 
@@ -367,7 +365,7 @@
                     });
                 }
             } catch (err) {
-                dbStatus.textContent = "فشل السحب: " + (err.message || JSON.stringify(err));
+                dbStatus.textContent = "خطأ داتابيز: " + err.message;
                 dbStatus.style.color = "#e74c3c";
             }
         }
@@ -387,7 +385,7 @@
 
         async function deleteReply(id, button) {
             if(confirm("هل أنت متأكد من الحذف؟")) {
-                const { error } = await supabaseClientInstance.from('conversations').delete().eq('id', id);
+                const { error } = await supabase.from('conversations').delete().eq('id', id);
                 if (!error) fetchReplies();
             }
         }
@@ -412,14 +410,14 @@
 
             try {
                 if (editRowId.value === "editing" && targetRowId) {
-                    const { error } = await supabaseClientInstance.from('conversations').update({
+                    const { error } = await supabase.from('conversations').update({
                         keyword: keyword,
                         reply_text: replyText,
                         associated_table: selectedTable
                     }).eq('id', targetRowId);
                     if (error) throw error;
                 } else {
-                    const { error } = await supabaseClientInstance.from('conversations').insert([{
+                    const { error } = await supabase.from('conversations').insert([{
                         keyword: keyword,
                         reply_text: replyText,
                         associated_table: selectedTable
