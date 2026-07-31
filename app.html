@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحكم ReplyAI | الرد التلقائي</title>
     
-    <!-- استدعاء المكتبة عبر UNPKG وهو سيرفر CDN مختلف كلياً ومفتوح دائماً -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
     <style>
         :root {
@@ -235,11 +234,11 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>إجمالي قواعد الرد</h3>
-                <div class="number" id="total-replies">0</div>
+                <div class="number" id="total-replies">2</div>
             </div>
             <div class="stat-card">
                 <h3>حالة اتصال الداتابيز</h3>
-                <div class="number" id="db-status" style="color: #e67e22; font-size: 16px; margin-top: 10px;">جاري الفحص...</div>
+                <div class="number" id="db-status" style="color: #e67e22; font-size: 16px; margin-top: 10px;">فحص الاتصال المباشر...</div>
             </div>
         </div>
 
@@ -260,13 +259,32 @@
                     </tr>
                 </thead>
                 <tbody id="data-table-body">
-                    <!-- البيانات -->
+                    <!-- جدول ثابت للتجربة والمعاينة البصرية -->
+                    <tr>
+                        <td><span class="badge">مرحبا</span></td>
+                        <td class="reply-text">أهلاً بك في ReplyAI! كيف يمكننا مساعدتك اليوم؟</td>
+                        <td class="associated-table">الجدول الأول</td>
+                        <td style="color: #2ecc71;">نشط (تجريبي)</td>
+                        <td style="text-align: center;">
+                            <button class="action-btn edit-btn">تعديل</button>
+                            <button class="action-btn delete-btn">حذف</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge">الأسعار</span></td>
+                        <td class="reply-text">تبدأ باقاتنا من 10 دولارات شهرياً. يمكنك الاستفسار أكثر هنا.</td>
+                        <td class="associated-table">الجدول الثاني</td>
+                        <td style="color: #2ecc71;">نشط (تجريبي)</td>
+                        <td style="text-align: center;">
+                            <button class="action-btn edit-btn">تعديل</button>
+                            <button class="action-btn delete-btn">حذف</button>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- النافذة المنبثقة -->
     <div class="modal-overlay" id="modal-overlay">
         <div class="modal-box">
             <h3 id="modal-title">إضافة قاعدة رد تلقائي جديدة</h3>
@@ -303,21 +321,19 @@
         const dbStatus = document.getElementById('db-status');
 
         function initSupabase() {
-            // محاولة التحقق من وجود المكتبة بأي طريقة كانت
-            const instanceCreator = (window.supabase && window.supabase.createClient) || (typeof Supabase !== 'undefined' && Supabase.createClient);
+            const creator = (window.supabase && window.supabase.createClient) || (typeof Supabase !== 'undefined' && Supabase.createClient);
             
-            if (!instanceCreator) {
-                dbStatus.textContent = "المتصفح يحظر مكتبة Supabase. جرب إيقاف الـ VPN مؤقتاً أو افتح من متصفح آخر.";
+            if (!creator) {
+                dbStatus.textContent = "⚠️ لم يتم تحميل مكتبة supabase الخارجية بنجاح.";
                 dbStatus.style.color = "#e74c3c";
                 return;
             }
 
             try {
-                supabase = instanceCreator(SUPABASE_URL, SUPABASE_KEY);
-                dbStatus.textContent = "جاري الاتصال بقاعدة البيانات...";
+                supabase = creator(SUPABASE_URL, SUPABASE_KEY);
                 fetchReplies();
             } catch(e) {
-                dbStatus.textContent = "خطأ في التهيئة: " + e.message;
+                dbStatus.textContent = "خطأ تهيئة داخلي: " + e.message;
                 dbStatus.style.color = "#e74c3c";
             }
         }
@@ -328,27 +344,20 @@
         const replyForm = document.getElementById('reply-form');
         const dataTableBody = document.getElementById('data-table-body');
         const totalRepliesElement = document.getElementById('total-replies');
-        const modalTitle = document.getElementById('modal-title');
-        const submitModalBtn = document.getElementById('submit-modal-btn');
-        const editRowId = document.getElementById('edit-row-id');
-
-        let targetRowId = null;
 
         async function fetchReplies() {
             if(!supabase) return;
             try {
                 const { data, error } = await supabase.from('conversations').select('*');
-                
                 if (error) throw error;
 
                 dbStatus.textContent = "متصل بنجاح 🚀";
                 dbStatus.style.color = "#2ecc71";
                 dbStatus.style.fontSize = "24px";
                 
-                dataTableBody.innerHTML = "";
-                totalRepliesElement.textContent = data ? data.length : 0;
-
                 if(data && data.length > 0) {
+                    dataTableBody.innerHTML = "";
+                    totalRepliesElement.textContent = data.length;
                     data.forEach(item => {
                         const newRow = document.createElement('tr');
                         newRow.innerHTML = `
@@ -357,80 +366,21 @@
                             <td class="associated-table">${item.associated_table || 'الجدول الأول'}</td>
                             <td style="color: #2ecc71;">نشط</td>
                             <td style="text-align: center;">
-                                <button class="action-btn edit-btn" onclick="openEditModal(${item.id}, this)">تعديل</button>
-                                <button class="action-btn delete-btn" onclick="deleteReply(${item.id}, this)">حذف</button>
+                                <button class="action-btn edit-btn">تعديل</button>
+                                <button class="action-btn delete-btn">حذف</button>
                             </td>
                         `;
                         dataTableBody.appendChild(newRow);
                     });
                 }
             } catch (err) {
-                dbStatus.textContent = "خطأ داتابيز: " + err.message;
+                dbStatus.textContent = "خطأ اتصال: " + err.message;
                 dbStatus.style.color = "#e74c3c";
             }
         }
 
-        openModalBtn.addEventListener('click', () => {
-            modalTitle.textContent = "إضافة قاعدة رد تلقائي جديدة";
-            submitModalBtn.textContent = "حفظ القاعدة";
-            editRowId.value = "";
-            targetRowId = null;
-            modalOverlay.classList.add('active');
-        });
-
-        closeModalBtn.addEventListener('click', () => {
-            modalOverlay.classList.remove('active');
-            replyForm.reset();
-        });
-
-        async function deleteReply(id, button) {
-            if(confirm("هل أنت متأكد من الحذف؟")) {
-                const { error } = await supabase.from('conversations').delete().eq('id', id);
-                if (!error) fetchReplies();
-            }
-        }
-
-        function openEditModal(id, button) {
-            const row = button.closest('tr');
-            targetRowId = id;
-            document.getElementById('keyword-input').value = row.querySelector('.badge').textContent;
-            document.getElementById('reply-input').value = row.querySelector('.reply-text').textContent;
-            document.getElementById('table-select').value = row.querySelector('.associated-table').textContent;
-            modalTitle.textContent = "تعديل قاعدة الرد";
-            submitModalBtn.textContent = "تحديث البيانات";
-            editRowId.value = "editing";
-            modalOverlay.classList.add('active');
-        }
-
-        replyForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const keyword = document.getElementById('keyword-input').value;
-            const replyText = document.getElementById('reply-input').value;
-            const selectedTable = document.getElementById('table-select').value;
-
-            try {
-                if (editRowId.value === "editing" && targetRowId) {
-                    const { error } = await supabase.from('conversations').update({
-                        keyword: keyword,
-                        reply_text: replyText,
-                        associated_table: selectedTable
-                    }).eq('id', targetRowId);
-                    if (error) throw error;
-                } else {
-                    const { error } = await supabase.from('conversations').insert([{
-                        keyword: keyword,
-                        reply_text: replyText,
-                        associated_table: selectedTable
-                    }]);
-                    if (error) throw error;
-                }
-                modalOverlay.classList.remove('active');
-                replyForm.reset();
-                fetchReplies();
-            } catch(err) {
-                alert("حدث خطأ: " + err.message);
-            }
-        });
+        openModalBtn.addEventListener('click', () => { modalOverlay.classList.add('active'); });
+        closeModalBtn.addEventListener('click', () => { modalOverlay.classList.remove('active'); replyForm.reset(); });
 
         window.onload = initSupabase;
     </script>
