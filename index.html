@@ -173,7 +173,7 @@
                         <h2 class="messenger-title">🔵 بوت Messenger الذكي</h2>
                         <p style="font-size: 13px; color: var(--text-muted);">يقوم بتحليل رسائل صفحتك على الفيسبوك والرد بذكاء متكامل.</p>
                         <div class="chat-box" id="chat-messenger">
-                            <div class="msg ai">أهلاً بك في ماسنجر! كيف يمكن للذكاء الاصطناعي مساعدتك اليوم في صفحتك؟</div>
+                            <div class="msg ai">أهلاً بك في ماسنجر! كيف يمكن للذكاء الاصطناعي مساعدتك اليوم في صفحتك?</div>
                         </div>
                     </div>
                     <div class="chat-input-area">
@@ -263,7 +263,8 @@
                 // استدعاء ملف الـ API الداخلي لـ Vercel لقراءة المفتاح السري بأمان
                 const configRes = await fetch('/api/get-config');
                 const configData = await configRes.json();
-                const currentKey = configData.apiKey;
+                // التعديل هنا لقراءة المفتاح بالاسم الصحيح المرتجع من السيرفر
+                const currentKey = configData.GEMINI_API_KEY;
 
                 if(!currentKey || currentKey.includes("أدخل")) {
                     throw new Error("لم يتم ضبط المفتاح في إعدادات Vercel بعد.");
