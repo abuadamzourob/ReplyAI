@@ -24,7 +24,6 @@
             margin: 0; padding: 0;
         }
 
-        /* شاشات الحماية والدفع */
         .auth-container, .payment-container {
             max-width: 400px;
             margin: 80px auto;
@@ -40,7 +39,6 @@
         .tab { flex: 1; padding: 10px; cursor: pointer; color: var(--text-muted); }
         .tab.active { color: var(--gold); border-bottom: 2px solid var(--gold); font-weight: bold; }
 
-        /* التطبيق الرئيسي */
         .app-container { display: none; }
 
         header {
@@ -58,12 +56,6 @@
         .logout-btn:hover { background: var(--danger); color: white; }
 
         .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
-        
-        /* إعدادات المفتاح */
-        .key-settings {
-            background: var(--card-bg); border: 1px solid var(--border-gold);
-            padding: 15px; border-radius: 8px; margin-bottom: 30px; display: flex; gap: 10px; align-items: center;
-        }
 
         .apps-grid { display: grid; grid-template-columns: 1fr; gap: 30px; }
         @media (min-width: 992px) { .apps-grid { grid-template-columns: 1fr 1fr 1fr; } }
@@ -116,7 +108,7 @@
 </head>
 <body>
 
-    <!-- 1. شاشة تسجيل الدخول (تم تصحيح التكرار) -->
+    <!-- شاشة تسجيل الدخول -->
     <div class="auth-container" id="auth-section">
         <h2 id="auth-title">تسجيل الدخول إلى ReplyAI</h2>
         <div class="tabs">
@@ -136,7 +128,7 @@
         </form>
     </div>
 
-    <!-- 2. شاشة الدفع والرسوم -->
+    <!-- شاشة الدفع والرسوم -->
     <div class="payment-container" id="payment-section" style="display: none;">
         <h2>💳 تفعيل الحساب والاشتراك</h2>
         <p>مرحباً بك! يرجى تفعيل اشتراكك الشهري الموحد للوصول إلى منصات الردود الذكية الثلاثة.</p>
@@ -147,7 +139,7 @@
         <button class="logout-btn" style="width: 100%; margin-top: 10px;" onclick="logout()">إلغاء وخروج</button>
     </div>
 
-    <!-- 3. التطبيق الرئيسي لـ 3 تطبيقات -->
+    <!-- التطبيق الرئيسي -->
     <div class="app-container" id="app-section">
         <header>
             <h1 style="color: var(--gold); margin: 0; font-size: 24px;">لوحة تحكم المنصات الذكية</h1>
@@ -158,21 +150,13 @@
         </header>
 
         <div class="container">
-            
-            <!-- إدخال الـ API الكي بشكل آمن على المتصفح الخاص بك فقط لمنع حظر جيتهاب -->
-            <div class="key-settings">
-                <label style="color: var(--gold); white-space: nowrap;">مفتاح Gemini API الخاص بك:</label>
-                <input type="password" id="api-key-input" style="flex: 1; padding: 10px; background: #000; border: 1px solid var(--border-gold); color: white; border-radius: 6px;" placeholder="أدخل مفتاح الـ AI هنا وتأكد أنه غير محظور...">
-                <button class="btn btn-gold" style="padding: 10px 20px;" onclick="saveApiKey()">حفظ المفتاح</button>
-            </div>
-
             <div class="apps-grid">
                 
-                <!-- تطبيق 1: واتساب -->
+                <!-- واتساب -->
                 <div class="app-card" data-platform="whatsapp">
                     <div>
                         <h2 class="whatsapp-title">🟢 بوت WhatsApp الذكي</h2>
-                        <p style="font-size: 13px; color: var(--text-muted);">يعمل بالذكاء الاصطناعي الكامل للرد الفوري التلقائي على محادثات الواتساب.</p>
+                        <p style="font-size: 13px; color: var(--text-muted);">يعمل بالذكاء الاصطناعي التلقائي على محادثات الواتساب.</p>
                         <div class="chat-box" id="chat-whatsapp">
                             <div class="msg ai">مرحباً! أنا بوت الواتساب المطور بالذكاء الاصطناعي، اسألني أي شيء وسأجيبك فوراً!</div>
                         </div>
@@ -183,11 +167,11 @@
                     </div>
                 </div>
 
-                <!-- تطبيق 2: فيسبوك ماسنجر -->
+                <!-- ماسنجر -->
                 <div class="app-card" data-platform="messenger">
                     <div>
                         <h2 class="messenger-title">🔵 بوت Messenger الذكي</h2>
-                        <p style="font-size: 13px; color: var(--text-muted);">يقوم بتحليل رسائل صفحتك على الفيسبوك والرد بذكاء بشري متكامل.</p>
+                        <p style="font-size: 13px; color: var(--text-muted);">يقوم بتحليل رسائل صفحتك على الفيسبوك والرد بذكاء متكامل.</p>
                         <div class="chat-box" id="chat-messenger">
                             <div class="msg ai">أهلاً بك في ماسنجر! كيف يمكن للذكاء الاصطناعي مساعدتك اليوم في صفحتك؟</div>
                         </div>
@@ -198,7 +182,7 @@
                     </div>
                 </div>
 
-                <!-- تطبيق 3: إنستغرام -->
+                <!-- إنستغرام -->
                 <div class="app-card" data-platform="instagram">
                     <div>
                         <h2 class="instagram-title">🟣 بوت Instagram الذكي</h2>
@@ -253,11 +237,6 @@
                 document.getElementById('payment-section').style.display = 'none';
                 document.getElementById('app-section').style.display = 'block';
                 document.getElementById('user-display-email').textContent = localStorage.getItem('user_session_email');
-                
-                // جلب المفتاح المحفوظ إن وجد
-                if(localStorage.getItem('my_gemini_key')) {
-                    document.getElementById('api-key-input').value = localStorage.getItem('my_gemini_key');
-                }
             } else {
                 document.getElementById('payment-section').style.display = 'block';
             }
@@ -269,20 +248,7 @@
             checkUserStatus();
         }
 
-        function saveApiKey() {
-            const key = document.getElementById('api-key-input').value.trim();
-            if(!key) { alert("الرجاء إدخال مفتاح صالح"); return; }
-            localStorage.setItem('my_gemini_key', key);
-            alert("✅ تم حفظ مفتاح الـ API بنجاح وأنت الآن محمي من حظر GitHub!");
-        }
-
         async function sendMessage(platform) {
-            const currentKey = localStorage.getItem('my_gemini_key');
-            if(!currentKey) {
-                alert("الرجاء إدخال مفتاح Gemini API وحفظه أولاً لكي يعمل الذكاء الاصطناعي!");
-                return;
-            }
-
             const inputEl = document.getElementById(`input-${platform}`);
             const boxEl = document.getElementById(`chat-${platform}`);
             const txt = inputEl.value.trim();
@@ -294,13 +260,22 @@
             const loadId = appendMsg(boxEl, "جاري التفكير تلقائياً...", 'ai');
 
             try {
+                // استدعاء ملف الـ API الداخلي لـ Vercel لقراءة المفتاح السري بأمان
+                const configRes = await fetch('/api/get-config');
+                const configData = await configRes.json();
+                const currentKey = configData.apiKey;
+
+                if(!currentKey || currentKey.includes("أدخل")) {
+                    throw new Error("لم يتم ضبط المفتاح في إعدادات Vercel بعد.");
+                }
+
                 let platformContext = "";
                 if(platform === 'whatsapp') {
-                    platformContext = "أنت الآن تعمل كبوت ذكي مدمج داخل تطبيق الواتساب (WhatsApp). أجب باختصار ووضوح شديد وبلطف وبطريقة مناسبة للمحادثات السريعة.";
+                    platformContext = "أنت الآن تعمل كبوت ذكي مدمج داخل تطبيق الواتساب (WhatsApp). أجب باختصار ووضوح شديد وبلطف.";
                 } else if(platform === 'messenger') {
-                    platformContext = "أنت الآن تعمل كبوت ذكي مدمج داخل فيسبوك ماسنجر (Facebook Messenger) لصفحة تجارية. أجب باحترافية وتفاعل وساعد العميل بشكل كامل باللغة العربية.";
+                    platformContext = "أنت الآن تعمل كبوت ذكي مدمج داخل فيسبوك ماسنجر (Facebook Messenger) لصفحة تجارية. أجب باحترافية.";
                 } else if(platform === 'instagram') {
-                    platformContext = "أنت الآن تعمل كبوت ذكي مدمج داخل حساب إنستغرام (Instagram). أجب بطريقة عصرية وتفاعلية، واستخدم الإيموجي المناسب لطبيعة المنصة.";
+                    platformContext = "أنت الآن تعمل كبوت ذكي مدمج داخل حساب إنستغرام (Instagram). أجب بطريقة عصرية وتفاعلية مع إيموجي.";
                 }
 
                 const promptText = `${platformContext}\n\nسؤال المستخدم الحالي هو: "${txt}"`;
@@ -315,7 +290,7 @@
                 if(d.error) throw new Error(d.error.message);
                 document.getElementById(loadId).textContent = d.candidates[0].content.parts[0].text;
             } catch (err) {
-                document.getElementById(loadId).textContent = "خطأ في الاتصال: تأكد أن المفتاح الذي أدخلته صحيح وغير محظور من Google.";
+                document.getElementById(loadId).textContent = "خطأ: تأكد من إضافة GEMINI_API_KEY في إعدادات Environment Variables على Vercel.";
             }
         }
 
@@ -327,7 +302,6 @@
         }
 
         function logout() { localStorage.clear(); location.reload(); }
-
         window.onload = checkUserStatus;
     </script>
 </body>
