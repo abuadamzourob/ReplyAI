@@ -27,7 +27,7 @@
         /* شاشات الحماية والدفع */
         .auth-container, .payment-container {
             max-width: 400px;
-            margin: 100px auto;
+            margin: 80px auto;
             padding: 30px;
             background: var(--card-bg);
             border: 1px solid var(--border-gold);
@@ -48,8 +48,9 @@
             padding: 20px 40px;
             background: var(--card-bg);
             display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 15px;
         }
-        .user-info { display: flex; align-items: center; gap: 15px; }
+        .user-info { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
         .logout-btn {
             background: transparent; color: var(--danger); border: 1px solid var(--danger);
             padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: 0.3s;
@@ -58,6 +59,12 @@
 
         .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
         
+        /* إعدادات المفتاح */
+        .key-settings {
+            background: var(--card-bg); border: 1px solid var(--border-gold);
+            padding: 15px; border-radius: 8px; margin-bottom: 30px; display: flex; gap: 10px; align-items: center;
+        }
+
         .apps-grid { display: grid; grid-template-columns: 1fr; gap: 30px; }
         @media (min-width: 992px) { .apps-grid { grid-template-columns: 1fr 1fr 1fr; } }
 
@@ -78,8 +85,8 @@
         }
 
         .btn {
-            width: 100%; padding: 12px; border: none; border-radius: 6px; 
-            font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; transition: 0.3s;
+            padding: 12px; border: none; border-radius: 6px; 
+            font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s;
         }
         .btn-gold { background: var(--gold); color: black; }
         .btn-gold:hover { background: var(--gold-hover); }
@@ -104,12 +111,12 @@
 
         .chat-input-area { display: flex; gap: 8px; }
         .chat-input-area input { flex: 1; padding: 10px; background: #000; border: 1px solid var(--border-gold); border-radius: 6px; color: white; }
-        .chat-input-area button { width: 70px; margin: 0; padding: 10px; font-size: 14px; }
+        .chat-input-area button { width: 70px; padding: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <!-- 1. شاشة تسجيل الدخول المحاكية لتجنب مشاكل الاتصال -->
+    <!-- 1. شاشة تسجيل الدخول (تم تصحيح التكرار) -->
     <div class="auth-container" id="auth-section">
         <h2 id="auth-title">تسجيل الدخول إلى ReplyAI</h2>
         <div class="tabs">
@@ -125,7 +132,7 @@
                 <label>كلمة المرور</label>
                 <input type="password" id="auth-password" required placeholder="******">
             </div>
-            <button type="submit" class="btn btn-gold" id="auth-submit-btn">دخول</button>
+            <button type="submit" class="btn btn-gold" style="width: 100%; margin-top: 10px;" id="auth-submit-btn">دخول</button>
         </form>
     </div>
 
@@ -143,7 +150,7 @@
     <!-- 3. التطبيق الرئيسي لـ 3 تطبيقات -->
     <div class="app-container" id="app-section">
         <header>
-            <h1 style="color: var(--gold); margin: 0;">لوحة تحكم المنصات الذكية الذاتية</h1>
+            <h1 style="color: var(--gold); margin: 0; font-size: 24px;">لوحة تحكم المنصات الذكية</h1>
             <div class="user-info">
                 <span id="user-display-email" style="color: var(--text-muted);"></span>
                 <button class="logout-btn" onclick="logout()">خروج</button>
@@ -151,6 +158,14 @@
         </header>
 
         <div class="container">
+            
+            <!-- إدخال الـ API الكي بشكل آمن على المتصفح الخاص بك فقط لمنع حظر جيتهاب -->
+            <div class="key-settings">
+                <label style="color: var(--gold); white-space: nowrap;">مفتاح Gemini API الخاص بك:</label>
+                <input type="password" id="api-key-input" style="flex: 1; padding: 10px; background: #000; border: 1px solid var(--border-gold); color: white; border-radius: 6px;" placeholder="أدخل مفتاح الـ AI هنا وتأكد أنه غير محظور...">
+                <button class="btn btn-gold" style="padding: 10px 20px;" onclick="saveApiKey()">حفظ المفتاح</button>
+            </div>
+
             <div class="apps-grid">
                 
                 <!-- تطبيق 1: واتساب -->
@@ -203,10 +218,6 @@
     </div>
 
     <script>
-        // كود الـ Gemini المشفر والمعكوس للحماية من روبوتات الحظر
-        const secretCode = "=A0M9mWv_M1pX7YkE9g4Z-XuN6w2Rj4DsAySazIA"; 
-        const GEMINI_API_KEY = atob(secretCode.split("").reverse().join(""));
-
         let authMode = 'login';
 
         function switchAuthMode(mode) {
@@ -217,7 +228,6 @@
             document.getElementById('auth-submit-btn').textContent = mode === 'login' ? 'دخول' : 'تسجيل وتفعيل';
         }
 
-        // معالجة الدخول الفوري لتفادي أخطاء قواعد البيانات الخارجية
         document.getElementById('auth-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const email = document.getElementById('auth-email').value;
@@ -243,6 +253,11 @@
                 document.getElementById('payment-section').style.display = 'none';
                 document.getElementById('app-section').style.display = 'block';
                 document.getElementById('user-display-email').textContent = localStorage.getItem('user_session_email');
+                
+                // جلب المفتاح المحفوظ إن وجد
+                if(localStorage.getItem('my_gemini_key')) {
+                    document.getElementById('api-key-input').value = localStorage.getItem('my_gemini_key');
+                }
             } else {
                 document.getElementById('payment-section').style.display = 'block';
             }
@@ -254,7 +269,20 @@
             checkUserStatus();
         }
 
+        function saveApiKey() {
+            const key = document.getElementById('api-key-input').value.trim();
+            if(!key) { alert("الرجاء إدخال مفتاح صالح"); return; }
+            localStorage.setItem('my_gemini_key', key);
+            alert("✅ تم حفظ مفتاح الـ API بنجاح وأنت الآن محمي من حظر GitHub!");
+        }
+
         async function sendMessage(platform) {
+            const currentKey = localStorage.getItem('my_gemini_key');
+            if(!currentKey) {
+                alert("الرجاء إدخال مفتاح Gemini API وحفظه أولاً لكي يعمل الذكاء الاصطناعي!");
+                return;
+            }
+
             const inputEl = document.getElementById(`input-${platform}`);
             const boxEl = document.getElementById(`chat-${platform}`);
             const txt = inputEl.value.trim();
@@ -277,7 +305,7 @@
 
                 const promptText = `${platformContext}\n\nسؤال المستخدم الحالي هو: "${txt}"`;
 
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${currentKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
@@ -287,313 +315,7 @@
                 if(d.error) throw new Error(d.error.message);
                 document.getElementById(loadId).textContent = d.candidates[0].content.parts[0].text;
             } catch (err) {
-                document.getElementById(loadId).textContent = "خطأ في الاتصال بمحرك الـ AI. تأكد من أن المفتاح غير محظور.";
-            }
-        }
-
-        function appendMsg(boxEl, t, s) {
-            const id = 'm-' + Date.now() + Math.random().toString(36).substr(2, 5);
-            boxEl.innerHTML += `<div class="msg ${s}" id="${id}">${t}</div>`;
-            boxEl.scrollTop = boxEl.scrollHeight;
-            return id;
-        }
-
-        function logout() { localStorage.clear(); location.reload(); }
-
-        window.onload = checkUserStatus;
-    </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReplyAI - إدارة المنصات الذكية</title>
-    <style>
-        :root {
-            --bg-dark: #0a0a0a;
-            --card-bg: #141414;
-            --gold: #d4af37;
-            --gold-hover: #f3e5ab;
-            --text-light: #ffffff;
-            --text-muted: #a6a6a6;
-            --border-gold: rgba(212, 175, 55, 0.25);
-            --danger: #e74c3c;
-            --success: #2ecc71;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            margin: 0; padding: 0;
-        }
-
-        /* شاشات الحماية والدفع */
-        .auth-container, .payment-container {
-            max-width: 400px;
-            margin: 100px auto;
-            padding: 30px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-gold);
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-            text-align: center;
-        }
-        .auth-container h2, .payment-container h2 { color: var(--gold); margin-bottom: 25px; }
-        .tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .tab { flex: 1; padding: 10px; cursor: pointer; color: var(--text-muted); }
-        .tab.active { color: var(--gold); border-bottom: 2px solid var(--gold); font-weight: bold; }
-
-        /* التطبيق الرئيسي */
-        .app-container { display: none; }
-
-        header {
-            border-bottom: 2px solid var(--gold);
-            padding: 20px 40px;
-            background: var(--card-bg);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .user-info { display: flex; align-items: center; gap: 15px; }
-        .logout-btn {
-            background: transparent; color: var(--danger); border: 1px solid var(--danger);
-            padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: 0.3s;
-        }
-        .logout-btn:hover { background: var(--danger); color: white; }
-
-        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
-        
-        .apps-grid { display: grid; grid-template-columns: 1fr; gap: 30px; }
-        @media (min-width: 992px) { .apps-grid { grid-template-columns: 1fr 1fr 1fr; } }
-
-        .app-card {
-            background: var(--card-bg); border: 1px solid var(--border-gold);
-            border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: space-between;
-        }
-        .app-card h2 { margin-top: 0; display: flex; align-items: center; gap: 10px; }
-        .whatsapp-title { color: #2ecc71; }
-        .messenger-title { color: #0084ff; }
-        .instagram-title { color: #e1306c; }
-
-        .form-group { margin-bottom: 15px; text-align: right; }
-        .form-group label { display: block; margin-bottom: 8px; color: var(--text-muted); }
-        .form-group input {
-            width: 100%; padding: 12px; background: #000;
-            border: 1px solid var(--border-gold); border-radius: 6px; color: white; box-sizing: border-box;
-        }
-
-        .btn {
-            width: 100%; padding: 12px; border: none; border-radius: 6px; 
-            font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; transition: 0.3s;
-        }
-        .btn-gold { background: var(--gold); color: black; }
-        .btn-gold:hover { background: var(--gold-hover); }
-        
-        .pay-btn {
-            background: var(--success); color: white; border: none;
-            padding: 14px 25px; border-radius: 6px; font-weight: bold; cursor: pointer;
-            width: 100%; font-size: 16px; margin-top: 15px;
-        }
-
-        .chat-box {
-            background: #000; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px;
-            height: 200px; overflow-y: auto; padding: 12px; margin: 15px 0;
-            display: flex; flex-direction: column; gap: 10px;
-        }
-        .msg { padding: 8px 12px; border-radius: 8px; max-width: 80%; font-size: 13px; }
-        .msg.user { background: #2c3e50; align-self: flex-start; }
-        .msg.ai { background: rgba(255,255,255,0.08); align-self: flex-end; }
-        .app-card[data-platform="whatsapp"] .msg.ai { border-right: 3px solid #2ecc71; }
-        .app-card[data-platform="messenger"] .msg.ai { border-right: 3px solid #0084ff; }
-        .app-card[data-platform="instagram"] .msg.ai { border-right: 3px solid #e1306c; }
-
-        .chat-input-area { display: flex; gap: 8px; }
-        .chat-input-area input { flex: 1; padding: 10px; background: #000; border: 1px solid var(--border-gold); border-radius: 6px; color: white; }
-        .chat-input-area button { width: 70px; margin: 0; padding: 10px; font-size: 14px; }
-    </style>
-</head>
-<body>
-
-    <!-- 1. شاشة تسجيل الدخول المحاكية لتجنب مشاكل الاتصال -->
-    <div class="auth-container" id="auth-section">
-        <h2 id="auth-title">تسجيل الدخول إلى ReplyAI</h2>
-        <div class="tabs">
-            <div class="tab active" id="tab-login" onclick="switchAuthMode('login')">دخول</div>
-            <div class="tab" id="tab-signup" onclick="switchAuthMode('signup')">حساب جديد</div>
-        </div>
-        <form id="auth-form">
-            <div class="form-group">
-                <label>البريد الإلكتروني</label>
-                <input type="email" id="auth-email" required placeholder="name@example.com">
-            </div>
-            <div class="form-group">
-                <label>كلمة المرور</label>
-                <input type="password" id="auth-password" required placeholder="******">
-            </div>
-            <button type="submit" class="btn btn-gold" id="auth-submit-btn">دخول</button>
-        </form>
-    </div>
-
-    <!-- 2. شاشة الدفع والرسوم -->
-    <div class="payment-container" id="payment-section" style="display: none;">
-        <h2>💳 تفعيل الحساب والاشتراك</h2>
-        <p>مرحباً بك! يرجى تفعيل اشتراكك الشهري الموحد للوصول إلى منصات الردود الذكية الثلاثة.</p>
-        <div style="background: rgba(212, 175, 55, 0.1); border: 1px solid var(--gold); padding: 15px; border-radius: 6px; margin: 20px 0;">
-            <strong>باقة الربط الثلاثي الذكي البلاتينية:</strong> 49$ / شهرياً
-        </div>
-        <button class="pay-btn" onclick="simulatePaymentSuccess()">💳 اشترك الآن وفعّل المنصات</button>
-        <button class="logout-btn" style="width: 100%; margin-top: 10px;" onclick="logout()">إلغاء وخروج</button>
-    </div>
-
-    <!-- 3. التطبيق الرئيسي لـ 3 تطبيقات -->
-    <div class="app-container" id="app-section">
-        <header>
-            <h1 style="color: var(--gold); margin: 0;">لوحة تحكم المنصات الذكية الذاتية</h1>
-            <div class="user-info">
-                <span id="user-display-email" style="color: var(--text-muted);"></span>
-                <button class="logout-btn" onclick="logout()">خروج</button>
-            </div>
-        </header>
-
-        <div class="container">
-            <div class="apps-grid">
-                
-                <!-- تطبيق 1: واتساب -->
-                <div class="app-card" data-platform="whatsapp">
-                    <div>
-                        <h2 class="whatsapp-title">🟢 بوت WhatsApp الذكي</h2>
-                        <p style="font-size: 13px; color: var(--text-muted);">يعمل بالذكاء الاصطناعي الكامل للرد الفوري التلقائي على محادثات الواتساب.</p>
-                        <div class="chat-box" id="chat-whatsapp">
-                            <div class="msg ai">مرحباً! أنا بوت الواتساب المطور بالذكاء الاصطناعي، اسألني أي شيء وسأجيبك فوراً!</div>
-                        </div>
-                    </div>
-                    <div class="chat-input-area">
-                        <input type="text" id="input-whatsapp" placeholder="اكتب رسالة تجريبية...">
-                        <button class="btn btn-gold" onclick="sendMessage('whatsapp')">إرسال</button>
-                    </div>
-                </div>
-
-                <!-- تطبيق 2: فيسبوك ماسنجر -->
-                <div class="app-card" data-platform="messenger">
-                    <div>
-                        <h2 class="messenger-title">🔵 بوت Messenger الذكي</h2>
-                        <p style="font-size: 13px; color: var(--text-muted);">يقوم بتحليل رسائل صفحتك على الفيسبوك والرد بذكاء بشري متكامل.</p>
-                        <div class="chat-box" id="chat-messenger">
-                            <div class="msg ai">أهلاً بك في ماسنجر! كيف يمكن للذكاء الاصطناعي مساعدتك اليوم في صفحتك؟</div>
-                        </div>
-                    </div>
-                    <div class="chat-input-area">
-                        <input type="text" id="input-messenger" placeholder="اكتب رسالة تجريبية...">
-                        <button class="btn btn-gold" onclick="sendMessage('messenger')">إرسال</button>
-                    </div>
-                </div>
-
-                <!-- تطبيق 3: إنستغرام -->
-                <div class="app-card" data-platform="instagram">
-                    <div>
-                        <h2 class="instagram-title">🟣 بوت Instagram الذكي</h2>
-                        <p style="font-size: 13px; color: var(--text-muted);">الرد التلقائي على الخاص والتعليقات بالاعتماد التام على محركات الـ AI.</p>
-                        <div class="chat-box" id="chat-instagram">
-                            <div class="msg ai">أهلاً بك في إنستغرام! جرب إرسال رسالة ليقوم الـ AI بالرد التلقائي السريع.</div>
-                        </div>
-                    </div>
-                    <div class="chat-input-area">
-                        <input type="text" id="input-instagram" placeholder="اكتب رسالة تجريبية...">
-                        <button class="btn btn-gold" onclick="sendMessage('instagram')">إرسال</button>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // كود الـ Gemini المشفر والمعكوس للحماية من روبوتات الحظر
-        const secretCode = "=A0M9mWv_M1pX7YkE9g4Z-XuN6w2Rj4DsAySazIA"; 
-        const GEMINI_API_KEY = atob(secretCode.split("").reverse().join(""));
-
-        let authMode = 'login';
-
-        function switchAuthMode(mode) {
-            authMode = mode;
-            document.getElementById('tab-login').classList.toggle('active', mode === 'login');
-            document.getElementById('tab-signup').classList.toggle('active', mode === 'signup');
-            document.getElementById('auth-title').textContent = mode === 'login' ? 'تسجيل الدخول إلى ReplyAI' : 'إنشاء حساب مستخدم جديد';
-            document.getElementById('auth-submit-btn').textContent = mode === 'login' ? 'دخول' : 'تسجيل وتفعيل';
-        }
-
-        // معالجة الدخول الفوري لتفادي أخطاء قواعد البيانات الخارجية
-        document.getElementById('auth-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('auth-email').value;
-            
-            if(authMode === 'signup') {
-                alert('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول مباشرة.');
-                switchAuthMode('login');
-            } else {
-                localStorage.setItem('user_session_token', 'mock_token_success');
-                localStorage.setItem('user_session_email', email);
-                checkUserStatus();
-            }
-        });
-
-        function checkUserStatus() {
-            const token = localStorage.getItem('user_session_token');
-            if(!token) return;
-
-            const isPaid = localStorage.getItem('user_has_paid'); 
-            document.getElementById('auth-section').style.display = 'none';
-
-            if(isPaid === 'true') {
-                document.getElementById('payment-section').style.display = 'none';
-                document.getElementById('app-section').style.display = 'block';
-                document.getElementById('user-display-email').textContent = localStorage.getItem('user_session_email');
-            } else {
-                document.getElementById('payment-section').style.display = 'block';
-            }
-        }
-
-        function simulatePaymentSuccess() {
-            localStorage.setItem('user_has_paid', 'true');
-            alert("🎉 تم تفعيل الاشتراك الثلاثي بنجاح!");
-            checkUserStatus();
-        }
-
-        async function sendMessage(platform) {
-            const inputEl = document.getElementById(`input-${platform}`);
-            const boxEl = document.getElementById(`chat-${platform}`);
-            const txt = inputEl.value.trim();
-            if(!txt) return;
-
-            appendMsg(boxEl, txt, 'user');
-            inputEl.value = "";
-            
-            const loadId = appendMsg(boxEl, "جاري التفكير تلقائياً...", 'ai');
-
-            try {
-                let platformContext = "";
-                if(platform === 'whatsapp') {
-                    platformContext = "أنت الآن تعمل كبوت ذكي مدمج داخل تطبيق الواتساب (WhatsApp). أجب باختصار ووضوح شديد وبلطف وبطريقة مناسبة للمحادثات السريعة.";
-                } else if(platform === 'messenger') {
-                    platformContext = "أنت الآن تعمل كبوت ذكي مدمج داخل فيسبوك ماسنجر (Facebook Messenger) لصفحة تجارية. أجب باحترافية وتفاعل وساعد العميل بشكل كامل باللغة العربية.";
-                } else if(platform === 'instagram') {
-                    platformContext = "أنت الآن تعمل كبوت ذكي مدمج داخل حساب إنستغرام (Instagram). أجب بطريقة عصرية وتفاعلية، واستخدم الإيموجي المناسب لطبيعة المنصة.";
-                }
-
-                const promptText = `${platformContext}\n\nسؤال المستخدم الحالي هو: "${txt}"`;
-
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
-                });
-                
-                const d = await response.json();
-                if(d.error) throw new Error(d.error.message);
-                document.getElementById(loadId).textContent = d.candidates[0].content.parts[0].text;
-            } catch (err) {
-                document.getElementById(loadId).textContent = "خطأ في الاتصال بمحرك الـ AI. تأكد من أن المفتاح غير محظور.";
+                document.getElementById(loadId).textContent = "خطأ في الاتصال: تأكد أن المفتاح الذي أدخلته صحيح وغير محظور من Google.";
             }
         }
 
